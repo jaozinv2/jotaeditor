@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JotaEditor - Editor de Fotos</title>
+<style>
+:root{
+  --sky1:#2f8fe8;--sky2:#8fd3ff;--sky3:#e6f7ff;--grass:#5cc83a;--grass2:#2e9a1c;
+  --glass:rgba(255,255,255,.42);--glass-edge:rgba(255,255,255,.85);--ink:#0b3a63;--ink2:#2f6794;
+  --btn1:#f4fbff;--btn2:#bfe6fb;--stage:rgba(8,48,90,.35);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--sky1:#0f4c9a;--sky2:#2f86d0;--sky3:#7cc3ee;--glass:rgba(20,60,110,.45);--glass-edge:rgba(160,210,255,.6);--ink:#eaf6ff;--ink2:#a9d2f2;--btn1:#3b7cb8;--btn2:#1d4f86;--stage:rgba(2,18,40,.5)}
+}
+:root[data-theme="dark"]{--sky1:#0f4c9a;--sky2:#2f86d0;--sky3:#7cc3ee;--glass:rgba(20,60,110,.45);--glass-edge:rgba(160,210,255,.6);--ink:#eaf6ff;--ink2:#a9d2f2;--btn1:#3b7cb8;--btn2:#1d4f86;--stage:rgba(2,18,40,.5)}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;font-family:"Segoe UI","Frutiger","Trebuchet MS",Tahoma,sans-serif;color:var(--ink);
+  background:
+   radial-gradient(60% 30% at 20% 12%,rgba(255,255,255,.9),transparent 70%),
+   radial-gradient(50% 25% at 78% 18%,rgba(255,255,255,.75),transparent 70%),
+   radial-gradient(70% 22% at 50% 100%,var(--grass) 0,var(--grass2) 60%,transparent 62%),
+   linear-gradient(180deg,var(--sky1) 0,var(--sky2) 55%,var(--sky3) 100%);
+  background-attachment:fixed;overflow-x:hidden}
+.bubble{position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+  background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.95) 0,rgba(255,255,255,.25) 28%,rgba(120,200,255,.18) 60%,rgba(255,255,255,.55) 100%);
+  box-shadow:inset 0 0 14px rgba(255,255,255,.7),0 6px 18px rgba(0,60,120,.18)}
+@media (prefers-reduced-motion:no-preference){.bubble{animation:bob 7s ease-in-out infinite alternate}}
+@keyframes bob{to{transform:translateY(-14px)}}
+.win{position:relative;z-index:1;max-width:1040px;margin:24px auto;width:calc(100% - 24px);border-radius:14px;
+  background:var(--glass);border:1px solid var(--glass-edge);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);
+  box-shadow:0 12px 40px rgba(0,50,110,.35),inset 0 1px 0 rgba(255,255,255,.9);overflow:hidden}
+.title{display:flex;align-items:center;gap:10px;padding:8px 12px;background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.15) 55%,rgba(255,255,255,.3));border-bottom:1px solid var(--glass-edge)}
+.title h1{margin:0;font-size:1.05rem;font-weight:600;flex:1;text-shadow:0 0 8px rgba(255,255,255,.9)}
+.dot{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;line-height:1;color:#0b3a63;user-select:none;width:26px;height:18px;border-radius:5px;border:1px solid rgba(0,40,90,.4);background:linear-gradient(180deg,#fff,#a9d8f5 50%,#6bb8ea 51%,#a6e0ff)}
+.dot.x{color:#fff;text-shadow:0 1px 2px rgba(90,10,0,.7);width:42px;background:linear-gradient(180deg,#ffd0c8,#e8603f 50%,#c7381b 51%,#f08b6e)}
+.body{display:grid;grid-template-columns:260px 1fr;gap:12px;padding:12px}
+@media (max-width:760px){.body{grid-template-columns:1fr}}
+.side{display:flex;flex-direction:column;gap:10px}
+fieldset{margin:0;border:1px solid var(--glass-edge);border-radius:10px;padding:8px 10px 10px;background:rgba(255,255,255,.18)}
+legend{padding:0 6px;font-weight:600;font-size:.85rem;color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:6px}
+button,select,.btn{font:inherit;font-size:.85rem;color:var(--ink);cursor:pointer;padding:6px 10px;border-radius:8px;border:1px solid rgba(0,60,120,.45);
+  background:linear-gradient(180deg,var(--btn1) 0,var(--btn2) 52%,color-mix(in srgb,var(--btn2) 80%,#2a8bd0) 53%,var(--btn1) 100%);
+  box-shadow:inset 0 1px 0 #fff,0 1px 3px rgba(0,50,100,.3)}
+button:hover,.btn:hover{filter:brightness(1.08)}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.5;cursor:default}
+:focus-visible{outline:3px solid #ffd54a;outline-offset:2px}
+option{background:#f4fbff;color:#0b3a63}
+.go{color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,60,0,.6);border-color:#1f7a10;
+  background:linear-gradient(180deg,#b9f59a 0,#5cc83a 50%,#2e9a1c 51%,#74dc4f 100%)}
+.slide{display:grid;grid-template-columns:68px 1fr 56px;align-items:center;gap:6px;font-size:.8rem;margin:3px 0}
+.slide input[type=number]{width:56px;padding:3px 4px;font:inherit;font-size:.8rem;color:#0b3a63;background:#f4fbff;border-radius:6px;border:1px solid rgba(0,60,120,.45);box-shadow:inset 0 1px 3px rgba(0,50,100,.25)}
+input[type=range]{width:100%;accent-color:#2e9a1c}
+.stage{position:relative;min-height:420px;border-radius:10px;background:var(--stage);border:1px solid var(--glass-edge);display:flex;align-items:center;justify-content:center;padding:12px;box-shadow:inset 0 2px 10px rgba(0,30,70,.35)}
+.drop{text-align:center;max-width:320px;padding:28px;border-radius:16px;border:2px dashed rgba(255,255,255,.85);color:#fff;text-shadow:0 1px 4px rgba(0,40,90,.6)}
+.drop.over{background:rgba(255,255,255,.25)}
+.drop b{display:block;font-size:1.25rem;margin-bottom:6px}
+.frame{position:relative;display:none;line-height:0;overflow:hidden;box-shadow:0 6px 24px rgba(0,20,50,.5)}
+canvas{max-width:100%;max-height:68vh;display:block}
+.ov{position:absolute;inset:0;cursor:crosshair;touch-action:none;display:none}
+.sel{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,30,60,.5);display:none}
+.status{margin:0;padding:6px 14px 10px;font-size:.8rem;color:var(--ink2)}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:5;padding:8px 16px;border-radius:20px;color:#fff;background:linear-gradient(180deg,#5cc83a,#2e9a1c);box-shadow:0 4px 14px rgba(0,60,0,.4);opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<span class="bubble" style="width:90px;height:90px;left:4%;top:60%"></span>
+<span class="bubble" style="width:46px;height:46px;right:6%;top:14%;animation-delay:-2s"></span>
+<span class="bubble" style="width:130px;height:130px;right:3%;bottom:8%;animation-delay:-4s"></span>
+<span class="bubble" style="width:28px;height:28px;left:10%;top:12%;animation-delay:-1s"></span>
+
+<main class="win">
+  <div class="title"><h1>JotaEditor</h1><span class="dot" aria-hidden="true">–</span><span class="dot" aria-hidden="true">□</span><span class="dot x" aria-hidden="true">✕</span></div>
+  <div class="body">
+    <aside class="side">
+      <fieldset><legend>Arquivo</legend>
+        <div class="row">
+          <label class="btn go" for="file">Abrir foto</label>
+          <input id="file" type="file" accept="image/*" hidden>
+          <button id="dl" disabled>Baixar</button>
+          <select id="fmt" aria-label="Formato"><option value="image/png">PNG</option><option value="image/jpeg">JPG</option><option value="image/webp">WebP</option></select>
+        </div>
+      </fieldset>
+      <fieldset><legend>Transformar</legend>
+        <div class="row">
+          <button data-op="rl" disabled>⟲ Girar 90°</button>
+          <button data-op="rr" disabled>⟳ Girar 90°</button>
+          <button data-op="fh" disabled>↔ Espelhar</button>
+          <button data-op="fv" disabled>↕ Espelhar</button>
+        </div>
+      </fieldset>
+      <fieldset><legend>Recortar</legend>
+        <div class="row">
+          <select id="ratio" aria-label="Proporção" disabled><option value="0">Livre</option><option value="1">1:1</option><option value="1.3333">4:3</option><option value="1.7778">16:9</option><option value="0.75">3:4</option></select>
+          <button id="cropBtn" disabled>Recortar</button>
+          <button id="cropOk" class="go" style="display:none">Aplicar</button>
+        </div>
+      </fieldset>
+      <fieldset><legend>Ajustes</legend>
+        <div class="slide"><span>Brilho</span><input type="range" id="br" min="30" max="170" value="100"><input type="number" id="brn" min="30" max="170" value="100" aria-label="Brilho, valor exato"></div>
+        <div class="slide"><span>Contraste</span><input type="range" id="co" min="30" max="170" value="100"><input type="number" id="con" min="30" max="170" value="100" aria-label="Contraste, valor exato"></div>
+        <div class="slide"><span>Saturação</span><input type="range" id="sa" min="0" max="200" value="100"><input type="number" id="san" min="0" max="200" value="100" aria-label="Saturação, valor exato"></div>
+        <div class="slide"><span>Desfoque</span><input type="range" id="bl" min="0" max="100" value="0"><input type="number" id="bln" min="0" max="100" value="0" aria-label="Desfoque, valor exato"></div>
+        <div class="row" style="margin-top:6px">
+          <button data-f="gray" disabled>P&amp;B</button>
+          <button data-f="sepia" disabled>Sépia</button>
+          <button data-f="invert" disabled>Negativo</button>
+        </div>
+      </fieldset>
+      <fieldset><legend>Histórico</legend>
+        <div class="row"><button id="undo" disabled>Desfazer</button><button id="reset" disabled>Voltar ao original</button></div>
+      </fieldset>
+    </aside>
+
+    <section class="stage" id="stage">
+      <div class="drop" id="drop"><b>Solte sua foto aqui</b>ou use “Abrir foto” para escolher um arquivo do seu computador. Nada é enviado para a internet.</div>
+      <div class="frame" id="frame">
+        <canvas id="cv"></canvas>
+        <div class="ov" id="ov"><div class="sel" id="sel"></div></div>
+      </div>
+    </section>
+  </div>
+  <p class="status" id="status">Nenhuma foto aberta.</p>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cv=$('cv'),ctx=cv.getContext('2d'),frame=$('frame'),ov=$('ov'),sel=$('sel');
+let cur=null,orig=null,undo=[],fx={gray:0,sepia:0,invert:0},crop=null,rect=null;
+const sliders=['br','co','sa','bl'];
+
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1600)}
+function mk(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c}
+function clone(c){const n=mk(c.width,c.height);n.getContext('2d').drawImage(c,0,0);return n}
+function filterStr(w,h){
+  w=w||cv.clientWidth||cur.width;h=h||cv.clientHeight||cur.height;
+  const b=($('bl').value/100*0.03*Math.max(w,h)).toFixed(2);
+  return `brightness(${$('br').value}%) contrast(${$('co').value}%) saturate(${$('sa').value}%) blur(${b}px) grayscale(${fx.gray}) sepia(${fx.sepia}) invert(${fx.invert})`;
+}
+function render(){
+  if(!cur)return;
+  cv.width=cur.width;cv.height=cur.height;ctx.drawImage(cur,0,0);
+  cv.style.filter=filterStr();
+  $('status').textContent=`${cur.width} × ${cur.height} px`;
+  $('undo').disabled=!undo.length;
+}
+function enable(on){
+  document.querySelectorAll('[data-op],[data-f],#cropBtn,#ratio,#dl,#reset').forEach(b=>b.disabled=!on);
+}
+function load(file){
+  if(!file||!file.type.startsWith('image/')){toast('Escolha um arquivo de imagem.');return}
+  const img=new Image();
+  img.onload=()=>{
+    cur=mk(img.naturalWidth,img.naturalHeight);cur.getContext('2d').drawImage(img,0,0);
+    orig=clone(cur);undo=[];resetAdj();endCrop();
+    $('drop').style.display='none';frame.style.display='inline-block';
+    enable(true);render();URL.revokeObjectURL(img.src);
+  };
+  img.onerror=()=>toast('Não foi possível abrir essa imagem.');
+  img.src=URL.createObjectURL(file);
+}
+function push(){undo.push(clone(cur));if(undo.length>20)undo.shift()}
+function resetAdj(){
+  $('br').value=$('co').value=$('sa').value=100;$('bl').value=0;fx={gray:0,sepia:0,invert:0};
+  sliders.forEach(id=>$(id+'n').value=$(id).value);
+}
+
+$('file').onchange=e=>load(e.target.files[0]);
+const stage=$('stage'),drop=$('drop');
+['dragenter','dragover'].forEach(t=>stage.addEventListener(t,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(t=>stage.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('over')}));
+stage.addEventListener('drop',e=>load(e.dataTransfer.files[0]));
+
+document.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>{
+  if(!cur)return;endCrop();push();
+  const op=b.dataset.op,w=cur.width,h=cur.height;let n;
+  if(op==='rl'||op==='rr'){
+    n=mk(h,w);const c=n.getContext('2d');
+    c.translate(h/2,w/2);c.rotate(op==='rr'?Math.PI/2:-Math.PI/2);c.drawImage(cur,-w/2,-h/2);
+  }else{
+    n=mk(w,h);const c=n.getContext('2d');
+    if(op==='fh'){c.translate(w,0);c.scale(-1,1)}else{c.translate(0,h);c.scale(1,-1)}
+    c.drawImage(cur,0,0);
+  }
+  cur=n;render();
+});
+
+sliders.forEach(id=>{
+  const r=$(id),n=$(id+'n');
+  r.oninput=()=>{n.value=r.value;cv.style.filter=filterStr()};
+  n.oninput=()=>{
+    const v=parseFloat(n.value);if(isNaN(v))return;
+    r.value=Math.min(Math.max(v,+r.min),+r.max);cv.style.filter=filterStr();
+  };
+  n.onchange=()=>{if(isNaN(parseFloat(n.value)))r.value=r.defaultValue;n.value=r.value;cv.style.filter=filterStr()};
+});
+document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{
+  const k=b.dataset.f;fx[k]=fx[k]?0:1;
+  if(fx[k]&&k==='gray')fx.sepia=0;if(fx[k]&&k==='sepia')fx.gray=0;
+  cv.style.filter=filterStr();
+});
+
+$('undo').onclick=()=>{if(undo.length){cur=undo.pop();endCrop();render()}};
+$('reset').onclick=()=>{if(!orig)return;push();cur=clone(orig);resetAdj();endCrop();render();toast('Foto original restaurada')};
+
+/* recorte */
+function endCrop(){crop=null;rect=null;ov.style.display='none';sel.style.display='none';$('cropOk').style.display='none';$('cropBtn').textContent='Recortar'}
+$('cropBtn').onclick=()=>{
+  if(crop){endCrop();return}
+  crop=true;ov.style.display='block';$('cropOk').style.display='';$('cropBtn').textContent='Cancelar';
+  toast('Arraste sobre a foto para escolher a área');
+};
+let start=null;
+function pos(e){const r=cv.getBoundingClientRect();return{x:Math.min(Math.max(e.clientX-r.left,0),r.width),y:Math.min(Math.max(e.clientY-r.top,0),r.height),W:r.width,H:r.height}}
+ov.onpointerdown=e=>{start=pos(e);ov.setPointerCapture(e.pointerId);drawSel(start)};
+ov.onpointermove=e=>{if(start)drawSel(pos(e))};
+ov.onpointerup=()=>{start=null};
+function drawSel(p){
+  const ratio=parseFloat($('ratio').value);
+  let w=p.x-start.x,h=p.y-start.y;
+  if(ratio){
+    const sx=Math.sign(w)||1,sy=Math.sign(h)||1;
+    let aw=Math.abs(w),ah=Math.abs(h);
+    if(aw/ah>ratio)aw=ah*ratio;else ah=aw/ratio;
+    const maxW=sx>0?p.W-start.x:start.x,maxH=sy>0?p.H-start.y:start.y;
+    const k=Math.min(1,maxW/aw,maxH/ah);aw*=k;ah*=k;w=aw*sx;h=ah*sy;
+  }
+  const x=Math.min(start.x,start.x+w),y=Math.min(start.y,start.y+h);
+  rect={x,y,w:Math.abs(w),h:Math.abs(h),W:p.W};
+  Object.assign(sel.style,{display:'block',left:x+'px',top:y+'px',width:rect.w+'px',height:rect.h+'px'});
+}
+$('cropOk').onclick=()=>{
+  if(!rect||rect.w<4||rect.h<4){toast('Selecione uma área maior para recortar.');return}
+  const k=cur.width/rect.W;push();
+  const w=Math.round(rect.w*k),h=Math.round(rect.h*k),n=mk(w,h);
+  n.getContext('2d').drawImage(cur,Math.round(rect.x*k),Math.round(rect.y*k),w,h,0,0,w,h);
+  cur=n;endCrop();render();toast('Recortado');
+};
+
+window.addEventListener('resize',()=>{if(cur)cv.style.filter=filterStr()});
+/* download */
+$('dl').onclick=()=>{
+  const out=mk(cur.width,cur.height),c=out.getContext('2d'),type=$('fmt').value;
+  if(type==='image/jpeg'){c.fillStyle='#fff';c.fillRect(0,0,out.width,out.height)}
+  c.filter=filterStr(cur.width,cur.height);c.drawImage(cur,0,0);
+  out.toBlob(b=>{
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);
+    a.download='jotaeditor.'+type.split('/')[1].replace('jpeg','jpg');a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),2000);toast('Foto baixada');
+  },type,.92);
+};
+</script>
+</body>
+</html>
