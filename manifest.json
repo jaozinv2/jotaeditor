@@ -1,0 +1,19 @@
+{
+  "name": "JotaEditor - Editor de Fotos",
+  "short_name": "JotaEditor",
+  "description": "Editor rápido de fotos: girar, espelhar, recortar e ajustar.",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#8fd3ff",
+  "theme_color": "#2f8fe8",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

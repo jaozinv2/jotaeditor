@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f8fe8">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.json">
+<title>JotaEditor - Editor de Fotos</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<span class="bubble" style="width:90px;height:90px;left:4%;top:60%"></span>
+<span class="bubble" style="width:46px;height:46px;right:6%;top:14%;animation-delay:-2s"></span>
+<span class="bubble" style="width:130px;height:130px;right:3%;bottom:8%;animation-delay:-4s"></span>
+<span class="bubble" style="width:28px;height:28px;left:10%;top:12%;animation-delay:-1s"></span>
+
+<main class="win">
+  <div class="title"><h1>JotaEditor</h1><span class="dot" aria-hidden="true">–</span><span class="dot" aria-hidden="true">□</span><span class="dot x" aria-hidden="true">✕</span></div>
+  <div class="body">
+    <aside class="side">
+      <fieldset><legend>Arquivo</legend>
+        <div class="row">
+          <label class="btn go" for="file">Abrir foto</label>
+          <input id="file" type="file" accept="image/*" hidden>
+          <button id="dl" disabled>Baixar</button>
+          <select id="fmt" aria-label="Formato"><option value="image/png">PNG</option><option value="image/jpeg">JPG</option><option value="image/webp">WebP</option></select>
+        </div>
+      </fieldset>
+      <fieldset><legend>Transformar</legend>
+        <div class="row">
+          <button data-op="rl" disabled>⟲ Girar 90°</button>
+          <button data-op="rr" disabled>⟳ Girar 90°</button>
+          <button data-op="fh" disabled>↔ Espelhar</button>
+          <button data-op="fv" disabled>↕ Espelhar</button>
+        </div>
+      </fieldset>
+      <fieldset><legend>Recortar</legend>
+        <div class="row">
+          <select id="ratio" aria-label="Proporção" disabled><option value="0">Livre</option><option value="1">1:1</option><option value="1.3333">4:3</option><option value="1.7778">16:9</option><option value="0.75">3:4</option></select>
+          <button id="cropBtn" disabled>Recortar</button>
+          <button id="cropOk" class="go" style="display:none">Aplicar</button>
+        </div>
+      </fieldset>
+      <fieldset><legend>Ajustes</legend>
+        <div class="slide"><span>Brilho</span><input type="range" id="br" min="30" max="170" value="100"><input type="number" id="brn" min="30" max="170" value="100" aria-label="Brilho, valor exato"></div>
+        <div class="slide"><span>Contraste</span><input type="range" id="co" min="30" max="170" value="100"><input type="number" id="con" min="30" max="170" value="100" aria-label="Contraste, valor exato"></div>
+        <div class="slide"><span>Saturação</span><input type="range" id="sa" min="0" max="200" value="100"><input type="number" id="san" min="0" max="200" value="100" aria-label="Saturação, valor exato"></div>
+        <div class="slide"><span>Desfoque</span><input type="range" id="bl" min="0" max="100" value="0"><input type="number" id="bln" min="0" max="100" value="0" aria-label="Desfoque, valor exato"></div>
+        <div class="row" style="margin-top:6px">
+          <button data-f="gray" disabled>P&amp;B</button>
+          <button data-f="sepia" disabled>Sépia</button>
+          <button data-f="invert" disabled>Negativo</button>
+        </div>
+      </fieldset>
+      <fieldset><legend>Histórico</legend>
+        <div class="row"><button id="undo" disabled>Desfazer</button><button id="reset" disabled>Voltar ao original</button></div>
+      </fieldset>
+    </aside>
+
+    <section class="stage" id="stage">
+      <div class="drop" id="drop"><b>Solte sua foto aqui</b>ou use “Abrir foto” para escolher um arquivo do seu computador. Nada é enviado para a internet.</div>
+      <div class="frame" id="frame">
+        <canvas id="cv"></canvas>
+        <div class="ov" id="ov"><div class="sel" id="sel"></div></div>
+      </div>
+    </section>
+  </div>
+  <p class="status" id="status">Nenhuma foto aberta.</p>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
